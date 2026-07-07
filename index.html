@@ -47,10 +47,12 @@
         /* Typography */
         h1, h2, h3, h4 { font-weight: 600; color: var(--text-main); letter-spacing: -0.01em; }
         
-        /* Sidebar */
+        /* Sidebar & Mobile Overlay */
         .sidebar { width: 260px; background-color: var(--sidebar-bg); display: flex; flex-direction: column; z-index: 100; transition: transform 0.3s ease; flex-shrink: 0; box-shadow: 2px 0 8px rgba(0,0,0,0.1); }
         .sidebar-header { height: 72px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .brand-logo { height: 28px; width: auto; }
+        .close-menu-btn { display: none; background: none; border: none; color: #94A3B8; cursor: pointer; padding: 8px; margin-right: -8px; }
+        
         .sidebar-nav { padding: 24px 12px; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
         .nav-item { padding: 12px 16px; color: #94A3B8; text-decoration: none; font-size: 0.875rem; font-weight: 500; border-radius: var(--radius-md); cursor: pointer; display: flex; align-items: center; gap: 12px; transition: var(--transition); border: 1px solid transparent; }
         .nav-item:hover { color: var(--surface); background-color: rgba(255, 255, 255, 0.05); }
@@ -58,9 +60,13 @@
         .nav-icon { width: 18px; height: 18px; opacity: 0.8; }
         .nav-item.active .nav-icon { opacity: 1; color: #4DA1FF; }
 
+        .mobile-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
+        .mobile-overlay.active { opacity: 1; pointer-events: auto; }
+
         /* Main Content & Topbar */
         .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; min-width: 0; }
-        .topbar { height: 72px; background-color: var(--surface); border-bottom: 1px solid var(--border-light); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; flex-shrink: 0; z-index: 10; box-shadow: var(--shadow-sm); }
+        .topbar { height: 72px; background-color: var(--surface); border-bottom: 1px solid var(--border-light); display: flex; align-items: center; padding: 0 32px; gap: 16px; flex-shrink: 0; z-index: 10; box-shadow: var(--shadow-sm); }
+        .menu-toggle { display: none; background: none; border: none; color: var(--text-main); cursor: pointer; padding: 8px; margin-left: -8px; }
         
         /* Global Search */
         .search-wrapper { position: relative; width: 100%; max-width: 400px; }
@@ -70,7 +76,7 @@
 
         /* Content Area */
         .content-area { padding: 32px; width: 100%; max-width: 1440px; margin: 0 auto; }
-        .page-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; }
+        .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
         .page-title { font-size: 1.5rem; }
         .page-subtitle { font-size: 0.875rem; color: var(--text-muted); margin-top: 4px; }
 
@@ -150,19 +156,53 @@
         /* Modal Customizado */
         .modal-overlay { position: fixed; inset: 0; background: rgba(10, 20, 30, 0.6); backdrop-filter: blur(2px); display: flex; justify-content: center; align-items: center; z-index: 10000; opacity: 0; pointer-events: none; transition: var(--transition); }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-content { background: var(--surface); width: 100%; max-width: 400px; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); transform: translateY(20px) scale(0.95); transition: var(--transition); overflow: hidden; }
+        .modal-content { background: var(--surface); width: 100%; max-width: 400px; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); transform: translateY(20px) scale(0.95); transition: var(--transition); overflow: hidden; margin: 20px; }
         .modal-overlay.active .modal-content { transform: translateY(0) scale(1); }
         .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border-light); }
         .modal-body { padding: 24px; font-size: 0.875rem; color: var(--text-muted); line-height: 1.5; }
-        .modal-footer { padding: 16px 24px; background: #F8FAFC; border-top: 1px solid var(--border-light); display: flex; justify-content: flex-end; gap: 12px; }
+        .modal-footer { padding: 16px 24px; background: #F8FAFC; border-top: 1px solid var(--border-light); display: flex; justify-content: flex-end; gap: 12px; flex-wrap: wrap; }
 
         /* Loading Moderno */
         #loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.8); backdrop-filter: blur(2px); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; opacity: 0; pointer-events: none; transition: var(--transition); }
         #loading-overlay.active { opacity: 1; pointer-events: auto; }
         .spinner { width: 40px; height: 40px; border: 3px solid var(--brand-light); border-top-color: var(--brand-primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        
-        .hidden { display: none !important; }
+
+        /* ================= MEDIA QUERIES (RESPONSIVIDADE COMPLETA) ================= */
+        @media (min-width: 769px) {
+            .mobile-overlay, .menu-toggle, .close-menu-btn { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            /* Sidebar Mobile Off-canvas */
+            .sidebar { position: fixed; top: 0; left: 0; height: 100%; transform: translateX(-100%); z-index: 101; }
+            .sidebar.open { transform: translateX(0); }
+            
+            /* Habilita botões e overlays mobile */
+            .mobile-overlay { display: block; }
+            .menu-toggle { display: block; }
+            .close-menu-btn { display: block; }
+            
+            /* Ajustes estruturais */
+            .topbar { padding: 0 20px; }
+            .content-area { padding: 20px; }
+            
+            /* Grids e botões */
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .form-grid { grid-template-columns: 1fr; }
+            .form-group.full-width { grid-column: auto; }
+            .form-actions { flex-direction: column; }
+            .form-actions .btn { width: 100%; justify-content: center; }
+            .page-header { flex-direction: column; align-items: flex-start; }
+            .page-header .btn { width: 100%; margin-top: 12px; }
+            
+            /* Ajuste Modal e Toast para mobile */
+            .modal-footer { flex-direction: column; }
+            .modal-footer .btn { width: 100%; }
+            .toast-container { right: 16px; left: 16px; bottom: 16px; align-items: stretch; }
+            .toast { min-width: 0; width: 100%; transform: translateY(120%); }
+            .toast.show { transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
@@ -190,13 +230,18 @@
     </div>
 
     <div class="app-layout">
-        <aside class="sidebar">
+        <div class="mobile-overlay" id="mobile-overlay"></div>
+
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <svg class="brand-logo" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M14 16C30 16 46 20 54 34C54 34 46 26 34 22C24 19 14 20 14 20V16Z" fill="#EBF3F8"/>
                     <path d="M14 28C24 28 36 32 44 42C44 42 38 36 30 32C24 29 14 30 14 30V28Z" fill="#EBF3F8" opacity="0.6"/>
                     <path d="M14 16V48C14 54 18 58 24 58C30 58 36 54 36 48V42L28 42V48C28 50 26 52 24 52C22 52 20 50 20 48V16H14Z" fill="#4DA1FF"/>
                 </svg>
+                <button class="close-menu-btn" id="close-menu-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
             </div>
             <nav class="sidebar-nav">
                 <a class="nav-item active" data-target="dashboard">
@@ -224,9 +269,12 @@
 
         <main class="main-content">
             <header class="topbar">
+                <button class="menu-toggle" id="menu-toggle">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+                </button>
                 <div class="search-wrapper">
                     <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-                    <input type="text" id="global-search" class="global-search" placeholder="Pesquisar por Nome, Código, CA ou Fabricante...">
+                    <input type="text" id="global-search" class="global-search" placeholder="Pesquisar (Nome, CA, Código)...">
                 </div>
             </header>
 
@@ -293,7 +341,7 @@
                             <h1 class="page-title" id="titulo-tela-cadastro">Cadastro de EPI</h1>
                             <p class="page-subtitle">Adicione ou edite equipamentos no catálogo.</p>
                         </div>
-                        <button class="btn btn-primary" onclick="App.prepararNovoCadastro()" id="btn-novo-cadastro" class="hidden">
+                        <button class="btn btn-primary" onclick="App.prepararNovoCadastro()" id="btn-novo-cadastro">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
                             Limpar Formulário
                         </button>
@@ -308,7 +356,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Nome do Equipamento *</label>
-                                    <input type="text" id="epi-nome" required placeholder="Ex: Luva de Raspa Couro">
+                                    <input type="text" id="epi-nome" required placeholder="Ex: Luva de Raspa">
                                 </div>
                                 <div class="form-group">
                                     <label>CA (Certificado) *</label>
@@ -436,7 +484,7 @@
         import { getFirestore, collection, addDoc, getDocs, query, where, updateDoc, doc, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         // =========================================================================
-        // INSIRA SUAS CHAVES DO FIREBASE AQUI (Não alterar a estrutura)
+        // INSIRA SUAS CHAVES DO FIREBASE AQUI
         // =========================================================================
         const firebaseConfig = {
             apiKey: "AIzaSyBnmMysGoeDnwretA87tVBE7rzw2M-BtmY",
@@ -452,16 +500,40 @@
 
         // --- ESTADO GLOBAL (Performance & Busca Instantânea) ---
         const State = {
-            epis: [],      // Apenas itens ATIVOS
-            historico: [], // Últimos 50 logs
+            epis: [],      
+            historico: [], 
             termoBusca: ''
         };
 
-        // --- UTILITÁRIOS UI (Toasts & Modais) ---
+        // --- UTILITÁRIOS UI (Toasts, Modais & Menu Mobile) ---
         class UIUtils {
             static showLoading(show) {
                 const overlay = document.getElementById('loading-overlay');
                 show ? overlay.classList.add('active') : overlay.classList.remove('active');
+            }
+
+            // NOVA LÓGICA: Ativar menu mobile
+            static initResponsiveMenu() {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('mobile-overlay');
+                const menuToggle = document.getElementById('menu-toggle');
+                const closeBtn = document.getElementById('close-menu-btn');
+
+                const toggleMenu = () => {
+                    sidebar.classList.toggle('open');
+                    overlay.classList.toggle('active');
+                };
+
+                if(menuToggle) menuToggle.addEventListener('click', toggleMenu);
+                if(closeBtn) closeBtn.addEventListener('click', toggleMenu);
+                if(overlay) overlay.addEventListener('click', toggleMenu);
+
+                // Fecha o menu ao clicar em qualquer item
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        if (window.innerWidth <= 768) toggleMenu();
+                    });
+                });
             }
 
             static toast(message, type = 'success') {
@@ -477,13 +549,12 @@
                 toast.innerHTML = `${icon} <span style="font-weight: 500;">${message}</span>`;
                 container.appendChild(toast);
                 
-                // Trigger reflow & animate
                 void toast.offsetWidth;
                 toast.classList.add('show');
                 
                 setTimeout(() => {
                     toast.classList.remove('show');
-                    setTimeout(() => toast.remove(), 300); // Wait transition
+                    setTimeout(() => toast.remove(), 300); 
                 }, 4000);
             }
 
@@ -493,7 +564,6 @@
                 document.getElementById('modal-desc').innerText = desc;
                 
                 const btn = document.getElementById('modal-confirm-btn');
-                // Remove old event listeners by replacing clone
                 const newBtn = btn.cloneNode(true);
                 btn.parentNode.replaceChild(newBtn, btn);
                 
@@ -523,30 +593,25 @@
 
             static async syncData() {
                 try {
-                    // Fetch Active EPIs
                     const qEpis = query(collection(db, 'epis'), where("status", "==", "ATIVO"));
                     const snapEpis = await getDocs(qEpis);
                     State.epis = snapEpis.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => a.nome.localeCompare(b.nome));
 
-                    // Fetch History (Ordered & Limited para performance)
                     const qHist = query(collection(db, 'historico'), orderBy("dataISO", "desc"), limit(50));
                     const snapHist = await getDocs(qHist);
                     State.historico = snapHist.docs.map(d => d.data());
 
                 } catch (error) {
                     console.error("Erro sincronizando banco:", error);
-                    // Não dar erro fatal na UI, deixa arrays vazios.
                 }
             }
 
             static async addEPI(epi) {
-                // Checar duplicidade (Código ou Nome exato no estado local ativo)
                 const cod = epi.codigo.toUpperCase();
                 const duplicado = State.epis.find(e => e.codigo.toUpperCase() === cod || e.nome.toLowerCase() === epi.nome.toLowerCase());
-                
                 if(duplicado) throw new Error("Já existe um EPI ativo com este Código ou Nome.");
                 
-                epi.codigo = cod; // padronizar
+                epi.codigo = cod; 
                 epi.status = 'ATIVO';
                 epi.dataCriacao = new Date().toISOString();
                 
@@ -597,7 +662,6 @@
                 document.getElementById('dash-estoque').innerText = totalEstoque;
                 document.getElementById('dash-minimo').innerText = abaixoMinimo;
 
-                // Encontrar Últimos eventos no histórico
                 const ultCad = State.historico.find(h => h.acao === 'CADASTRO');
                 const ultMov = State.historico.find(h => h.acao === 'ENTRADA' || h.acao === 'ALTERAÇÃO' || h.acao === 'EXCLUSÃO');
                 const ultRec = State.historico.find(h => h.acao === 'ENTRADA');
@@ -607,7 +671,7 @@
                 
                 if(ultRec) {
                     document.getElementById('dash-recebimento').innerText = ultRec.item;
-                    document.getElementById('dash-desc-recebimento').innerText = ultRec.detalhes.split('|')[0]; // Pega só a qtd adicionada
+                    document.getElementById('dash-desc-recebimento').innerText = ultRec.detalhes.split('|')[0]; 
                 }
             }
 
@@ -715,15 +779,11 @@
                     });
                 });
 
-                // Pesquisa Global Instantânea
                 document.getElementById('global-search').addEventListener('input', (e) => {
                     State.termoBusca = e.target.value;
-                    
-                    // Se digitar algo, força ir pra tela de estoque
                     if(State.termoBusca.length > 0 && !document.getElementById('view-estoque').classList.contains('active')) {
                         document.querySelector('.nav-item[data-target="estoque"]').click();
                     }
-                    
                     AppUI.renderEstoque();
                 });
             }
@@ -733,7 +793,8 @@
         class App {
             static async init() {
                 AppUI.initNavigation();
-                window.UI = UIUtils; // Exporta utilitários para onclicks HTML
+                UIUtils.initResponsiveMenu(); // Inicia ouvintes do menu mobile
+                window.UI = UIUtils; 
                 
                 if(firebaseConfig.apiKey !== "SUA_API_KEY") {
                     await this.refreshData();
@@ -752,7 +813,6 @@
                 UIUtils.showLoading(false);
             }
 
-            // --- CADASTRO & EDIÇÃO ---
             static prepararNovoCadastro() {
                 document.getElementById('form-epi').reset();
                 document.getElementById('epi-id').value = '';
@@ -764,10 +824,8 @@
                 const epi = State.epis.find(e => e.id === id);
                 if(!epi) return;
 
-                // Navega para aba de cadastro
                 document.querySelector('.nav-item[data-target="cadastro"]').click();
                 
-                // Preenche dados
                 document.getElementById('titulo-tela-cadastro').innerText = `Editar: ${epi.codigo}`;
                 document.getElementById('epi-id').value = epi.id;
                 document.getElementById('epi-nome').value = epi.nome;
@@ -823,7 +881,6 @@
                 );
             }
 
-            // --- RECEBIMENTOS ---
             static async salvarRecebimento(e) {
                 e.preventDefault();
                 const id = document.getElementById('rec-epi').value;
