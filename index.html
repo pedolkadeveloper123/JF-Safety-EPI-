@@ -10,7 +10,6 @@
     
     <style>
         :root {
-            var(--brand-primary): #0F4C81;
             --brand-primary: #0F4C81;
             --sidebar-bg: #081C2E;
             --app-bg: #F5F7FA;
@@ -21,7 +20,6 @@
             --danger: #DC2626;
             --success: #059669;
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             --radius-md: 8px;
             --radius-lg: 12px;
         }
@@ -62,7 +60,8 @@
         label { font-size: 0.875rem; font-weight: 500; color: var(--text-main); }
         input, select { padding: 10px; border: 1px solid var(--border-light); border-radius: var(--radius-md); font-size: 0.875rem; outline: none; }
         input:focus, select:focus { border-color: var(--brand-primary); }
-        .btn { padding: 10px 20px; border-radius: var(--radius-md); font-size: 0.875rem; font-weight: 500; cursor: pointer; border: none; }
+        .btn { padding: 10px 20px; border-radius: var(--radius-md); font-size: 0.875rem; font-weight: 500; cursor: pointer; border: none; transition: 0.2s; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-primary { background-color: var(--brand-primary); color: var(--white); }
         .btn-secondary { background-color: var(--white); color: var(--text-main); border: 1px solid var(--border-light); }
         
@@ -77,9 +76,14 @@
         .empty-state-large { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px; background-color: var(--white); border: 1px dashed var(--border-light); border-radius: var(--radius-lg); color: var(--text-muted); margin-top: 24px; }
         .empty-state-large p { font-size: 1rem; font-weight: 500; color: var(--text-main); margin-bottom: 8px; }
         .hidden { display: none !important; }
+        
+        /* Loading Overlay */
+        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: flex; justify-content: center; align-items: center; z-index: 9999; font-weight: 600; color: var(--brand-primary); }
     </style>
 </head>
 <body>
+    <div id="loading-overlay" class="hidden">Sincronizando com a nuvem...</div>
+
     <div class="app-layout">
         <aside class="sidebar">
             <div class="sidebar-header">
@@ -124,11 +128,11 @@
                     <div id="cadastro-empty" class="empty-state-large">
                         <p>Nenhum formulário ativo.</p>
                         <span>Clique em "Novo EPI" para iniciar.</span>
-                        <button class="btn btn-primary" style="margin-top: 16px;" onclick="UI.showForm('cadastro-form', 'cadastro-empty')">Novo EPI</button>
+                        <button class="btn btn-primary" style="margin-top: 16px;" onclick="window.UI.showForm('cadastro-form', 'cadastro-empty')">Novo EPI</button>
                     </div>
 
                     <div id="cadastro-form" class="card hidden">
-                        <form id="form-epi" onsubmit="App.salvarEPI(event)">
+                        <form id="form-epi" onsubmit="window.App.salvarEPI(event)">
                             <div class="form-grid">
                                 <div class="form-group"><label>Nome do EPI</label><input type="text" id="epi-nome" required></div>
                                 <div class="form-group"><label>Código Interno</label><input type="text" id="epi-codigo" required></div>
@@ -138,8 +142,8 @@
                                 <div class="form-group"><label>Estoque Mínimo</label><input type="number" id="epi-minimo" value="5" required></div>
                             </div>
                             <div style="margin-top: 24px; display: flex; gap: 12px;">
-                                <button type="submit" class="btn btn-primary">Salvar EPI</button>
-                                <button type="button" class="btn btn-secondary" onclick="UI.hideForm('cadastro-form', 'cadastro-empty')">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">Salvar na Nuvem</button>
+                                <button type="button" class="btn btn-secondary" onclick="window.UI.hideForm('cadastro-form', 'cadastro-empty')">Cancelar</button>
                             </div>
                         </form>
                     </div>
@@ -150,11 +154,11 @@
                     
                     <div id="rec-empty" class="empty-state-large">
                         <p>Nenhum recebimento em andamento.</p>
-                        <button class="btn btn-primary" style="margin-top: 16px;" onclick="UI.showForm('rec-form', 'rec-empty')">Nova Entrada</button>
+                        <button class="btn btn-primary" style="margin-top: 16px;" onclick="window.UI.showForm('rec-form', 'rec-empty')">Nova Entrada</button>
                     </div>
 
                     <div id="rec-form" class="card hidden">
-                        <form onsubmit="App.salvarRecebimento(event)">
+                        <form id="form-rec" onsubmit="window.App.salvarRecebimento(event)">
                             <div class="form-grid">
                                 <div class="form-group"><label>Nota Fiscal</label><input type="text" id="rec-nf" required></div>
                                 <div class="form-group">
@@ -164,15 +168,15 @@
                                 <div class="form-group"><label>Quantidade Recebida</label><input type="number" id="rec-qtd" min="1" required></div>
                             </div>
                             <div style="margin-top: 24px; display: flex; gap: 12px;">
-                                <button type="submit" class="btn btn-primary">Confirmar Recebimento</button>
-                                <button type="button" class="btn btn-secondary" onclick="UI.hideForm('rec-form', 'rec-empty')">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">Confirmar e Atualizar Estoque</button>
+                                <button type="button" class="btn btn-secondary" onclick="window.UI.hideForm('rec-form', 'rec-empty')">Cancelar</button>
                             </div>
                         </form>
                     </div>
                 </section>
 
                 <section id="view-estoque" class="view">
-                    <h1 class="page-title">Controle de Estoque</h1>
+                    <h1 class="page-title">Controle de Estoque (Tempo Real)</h1>
                     
                     <div id="estoque-empty" class="empty-state-large">
                         <p>Nenhum registro encontrado.</p>
@@ -200,27 +204,80 @@
         </main>
     </div>
 
-    <script>
-        // --- BANCO DE DADOS LOCAL (localStorage) ---
+    <script type="module">
+        // Importa os módulos essenciais do Firebase (Versão 10+)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, query, where, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        // =========================================================================
+        // ATENÇÃO: SUBSTITUA AS CHAVES ABAIXO PELAS DO SEU PROJETO FIREBASE
+        // =========================================================================
+        const firebaseConfig = {
+            apiKey: "SUA_API_KEY",
+            authDomain: "SEU_PROJETO.firebaseapp.com",
+            projectId: "SEU_PROJETO",
+            storageBucket: "SEU_PROJETO.appspot.com",
+            messagingSenderId: "SEU_SENDER_ID",
+            appId: "SEU_APP_ID"
+        };
+
+        // Inicializa o Firebase e o Firestore
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- CAMADA DE BANCO DE DADOS (Firestore) ---
         class DB {
-            static getEPIs() { return JSON.parse(localStorage.getItem('jf_epis')) || []; }
-            static saveEPI(epi) {
-                const epis = this.getEPIs();
-                epis.push(epi);
-                localStorage.setItem('jf_epis', JSON.stringify(epis));
+            static async getEPIs() {
+                try {
+                    const episCol = collection(db, 'epis');
+                    const snapshot = await getDocs(episCol);
+                    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                } catch (error) {
+                    console.error("Erro ao buscar EPIs:", error);
+                    return [];
+                }
             }
-            static updateEstoque(codigo, qtdAdicional) {
-                const epis = this.getEPIs();
-                const index = epis.findIndex(e => e.codigo === codigo);
-                if (index !== -1) {
-                    epis[index].estoque = parseInt(epis[index].estoque) + parseInt(qtdAdicional);
-                    localStorage.setItem('jf_epis', JSON.stringify(epis));
+
+            static async saveEPI(epi) {
+                try {
+                    const episCol = collection(db, 'epis');
+                    await addDoc(episCol, epi);
+                    return true;
+                } catch (error) {
+                    console.error("Erro ao salvar EPI:", error);
+                    return false;
+                }
+            }
+
+            static async updateEstoque(codigo, qtdAdicional) {
+                try {
+                    const episCol = collection(db, 'epis');
+                    const q = query(episCol, where("codigo", "==", codigo));
+                    const snapshot = await getDocs(q);
+
+                    if (!snapshot.empty) {
+                        const docRef = doc(db, 'epis', snapshot.docs[0].id);
+                        const currentData = snapshot.docs[0].data();
+                        const novoEstoque = parseInt(currentData.estoque) + parseInt(qtdAdicional);
+                        
+                        await updateDoc(docRef, { estoque: novoEstoque });
+                        return true;
+                    }
+                    return false;
+                } catch (error) {
+                    console.error("Erro ao atualizar estoque:", error);
+                    return false;
                 }
             }
         }
 
-        // --- INTERFACE (UI) ---
+        // --- CAMADA DE INTERFACE (UI) ---
         class UI {
+            static showLoading(show) {
+                const overlay = document.getElementById('loading-overlay');
+                show ? overlay.classList.remove('hidden') : overlay.classList.add('hidden');
+            }
+
             static initNav() {
                 document.querySelectorAll('.nav-item').forEach(item => {
                     item.addEventListener('click', (e) => {
@@ -228,7 +285,7 @@
                         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
                         item.classList.add('active');
                         document.getElementById(`view-${item.dataset.target}`).classList.add('active');
-                        App.refreshViews(); // Atualiza dados ao trocar de tela
+                        window.App.refreshViews();
                     });
                 });
             }
@@ -236,7 +293,7 @@
             static showForm(formId, emptyId) {
                 document.getElementById(emptyId).classList.add('hidden');
                 document.getElementById(formId).classList.remove('hidden');
-                App.loadSelectEPIs(); // Atualiza o select de recebimentos
+                if (formId === 'rec-form') window.App.loadSelectEPIs();
             }
 
             static hideForm(formId, emptyId) {
@@ -289,63 +346,93 @@
             }
         }
 
-        // --- LÓGICA PRINCIPAL (App) ---
+        // --- LÓGICA PRINCIPAL DA APLICAÇÃO ---
         class App {
-            static init() {
+            static async init() {
                 UI.initNav();
-                this.refreshViews();
+                // Apenas inicia se o Firebase estiver configurado (evita travar a tela)
+                if(firebaseConfig.apiKey !== "SUA_API_KEY") {
+                    await this.refreshViews();
+                } else {
+                    console.warn("Configure suas chaves do Firebase no código para conectar à nuvem.");
+                }
             }
 
-            static refreshViews() {
-                const epis = DB.getEPIs();
+            static async refreshViews() {
+                UI.showLoading(true);
+                const epis = await DB.getEPIs();
                 UI.updateDashboard(epis);
                 UI.renderEstoque(epis);
+                UI.showLoading(false);
             }
 
-            static salvarEPI(e) {
+            static async salvarEPI(e) {
                 e.preventDefault();
+                UI.showLoading(true);
+
                 const epi = {
                     nome: document.getElementById('epi-nome').value,
                     codigo: document.getElementById('epi-codigo').value,
                     ca: document.getElementById('epi-ca').value,
                     fab: document.getElementById('epi-fab').value,
-                    estoque: document.getElementById('epi-estoque').value,
-                    minimo: document.getElementById('epi-minimo').value
+                    estoque: parseInt(document.getElementById('epi-estoque').value),
+                    minimo: parseInt(document.getElementById('epi-minimo').value),
+                    dataCadastro: new Date().toISOString()
                 };
                 
-                DB.saveEPI(epi);
-                alert('EPI Cadastrado com sucesso!');
-                document.getElementById('form-epi').reset();
-                UI.hideForm('cadastro-form', 'cadastro-empty');
-                this.refreshViews();
+                const sucesso = await DB.saveEPI(epi);
+                UI.showLoading(false);
+
+                if (sucesso) {
+                    alert('EPI Cadastrado com sucesso na nuvem!');
+                    document.getElementById('form-epi').reset();
+                    UI.hideForm('cadastro-form', 'cadastro-empty');
+                    this.refreshViews();
+                } else {
+                    alert('Erro ao salvar. Verifique suas regras do Firestore.');
+                }
             }
 
-            static loadSelectEPIs() {
+            static async loadSelectEPIs() {
+                UI.showLoading(true);
                 const select = document.getElementById('rec-epi');
-                const epis = DB.getEPIs();
+                const epis = await DB.getEPIs();
+                
                 select.innerHTML = '<option value="">Selecione...</option>';
                 epis.forEach(e => {
-                    select.innerHTML += `<option value="${e.codigo}">[${e.codigo}] ${e.nome}</option>`;
+                    select.innerHTML += `<option value="${e.codigo}">[${e.codigo}] ${e.nome} (Estoque: ${e.estoque})</option>`;
                 });
+                UI.showLoading(false);
             }
 
-            static salvarRecebimento(e) {
+            static async salvarRecebimento(e) {
                 e.preventDefault();
                 const codigoEpi = document.getElementById('rec-epi').value;
                 const qtd = document.getElementById('rec-qtd').value;
 
                 if(!codigoEpi) return alert("Selecione um EPI.");
 
-                DB.updateEstoque(codigoEpi, qtd);
-                alert('Recebimento registrado e estoque atualizado!');
-                e.target.reset();
-                UI.hideForm('rec-form', 'rec-empty');
-                this.refreshViews();
+                UI.showLoading(true);
+                const sucesso = await DB.updateEstoque(codigoEpi, qtd);
+                UI.showLoading(false);
+
+                if (sucesso) {
+                    alert('Recebimento registrado e estoque atualizado na nuvem!');
+                    document.getElementById('form-rec').reset();
+                    UI.hideForm('rec-form', 'rec-empty');
+                    this.refreshViews();
+                } else {
+                    alert('Erro ao atualizar estoque.');
+                }
             }
         }
 
-        // Inicia o sistema
-        document.addEventListener('DOMContentLoaded', () => App.init());
+        // Expõe as classes globalmente para que os onclicks do HTML funcionem
+        window.UI = UI;
+        window.App = App;
+
+        // Inicia a aplicação
+        document.addEventListener('DOMContentLoaded', () => window.App.init());
     </script>
 </body>
 </html>
