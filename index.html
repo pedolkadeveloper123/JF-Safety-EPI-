@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JF Safety | EPI Management System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Identidade Visual */
+            --brand-primary: #0F4C81;
+            --sidebar-bg: #081C2E;
+            --app-bg: #F5F7FA;
+            
+            /* Cores neutras */
+            --white: #FFFFFF;
+            --text-main: #111827;
+            --text-muted: #6B7280;
+            --border-light: #E5E7EB;
+            
+            /* Alertas */
+            --danger: #DC2626;
+            
+            /* Sombras e Raios */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--app-bg);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-layout {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar-header {
+            height: 72px;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+        }
+
+        .brand-logo {
+            height: 32px;
+            width: auto;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            padding: 24px 12px;
+            gap: 4px;
+        }
+
+        .nav-item {
+            padding: 10px 16px;
+            color: #94A3B8;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: var(--radius-md);
+            transition: all 0.2s ease;
+        }
+
+        .nav-item:hover {
+            color: var(--white);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-item.active {
+            color: var(--white);
+            background-color: var(--brand-primary);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .topbar {
+            height: 72px;
+            background-color: var(--white);
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 480px;
+        }
+
+        .global-search {
+            width: 100%;
+            padding: 10px 16px;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .global-search:focus {
+            border-color: var(--brand-primary);
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--border-light);
+        }
+
+        .content-area {
+            padding: 40px;
+            max-width: 1440px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 32px;
+            color: var(--text-main);
+        }
+
+        /* Views */
+        .view { display: none; }
+        .view.active { display: block; animation: fadeIn 0.3s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards & Dashboard */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background-color: var(--white);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        /* Estados Vazios (Empty States) */
+        .empty-state {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .empty-state-large {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            background-color: var(--white);
+            border: 1px dashed var(--border-light);
+            border-radius: var(--radius-lg);
+            color: var(--text-muted);
+            margin-top: 24px;
+        }
+
+        .empty-state-large p {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .empty-state-large span {
+            font-size: 0.875rem;
+        }
+
+        /* Base para formulários vazios */
+        .form-actions {
+            margin-top: 24px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover { opacity: 0.9; }
+        
+        .btn-primary { background-color: var(--brand-primary); color: var(--white); }
+        .btn-secondary { background-color: var(--white); color: var(--text-main); border: 1px solid var(--border-light); }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <svg class="brand-logo" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14 16C30 16 46 20 54 34C54 34 46 26 34 22C24 19 14 20 14 20V16Z" fill="#0F4C81"/>
+                    <path d="M14 28C24 28 36 32 44 42C44 42 38 36 30 32C24 29 14 30 14 30V28Z" fill="#0F4C81" opacity="0.8"/>
+                    <path d="M14 16V48C14 54 18 58 24 58C30 58 36 54 36 48V42L28 42V48C28 50 26 52 24 52C22 52 20 50 20 48V16H14Z" fill="#F5F7FA"/>
+                </svg>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-target="dashboard">Dashboard</a>
+                <a href="#" class="nav-item" data-target="cadastro">Cadastro de EPIs</a>
+                <a href="#" class="nav-item" data-target="recebimentos">Recebimentos</a>
+                <a href="#" class="nav-item" data-target="movimentacoes">Movimentações</a>
+                <a href="#" class="nav-item" data-target="estoque">Estoque</a>
+                <a href="#" class="nav-item" data-target="historico">Histórico</a>
+                <a href="#" class="nav-item" data-target="relatorios">Relatórios</a>
+                <a href="#" class="nav-item" data-target="configuracoes">Configurações</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="search-container">
+                    <input type="text" class="global-search" placeholder="Pesquisar por Nome, Código, CA ou Fornecedor...">
+                </div>
+                <div class="user-profile">
+                    <div class="avatar"></div>
+                </div>
+            </header>
+
+            <div class="content-area">
+                
+                <section id="view-dashboard" class="view active">
+                    <h1 class="page-title">Dashboard</h1>
+                    <div class="dashboard-grid">
+                        <div class="card">
+                            <h3 class="card-title">EPIs Cadastrados</h3>
+                            <div class="empty-state">Nenhum registro encontrado.</div>
+                        </div>
+                        <div class="card">
+                            <h3 class="card-title">Estoque Total</h3>
+                            <div class="empty-state">Nenhum registro encontrado.</div>
+                        </div>
+                        <div class="card">
+                            <h3 class="card-title">Itens Abaixo do Mínimo</h3>
+                            <div class="empty-state">Nenhum registro encontrado.</div>
+                        </div>
+                        <div class="card">
+                            <h3 class="card-title">Últimos Recebimentos</h3>
+                            <div class="empty-state">Nenhum registro encontrado.</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="view-cadastro" class="view">
+                    <h1 class="page-title">Cadastro de EPIs</h1>
+                    <div class="card">
+                        <div class="empty-state-large">
+                            <p>Nenhum formulário ativo no momento.</p>
+                            <span>Clique em "Novo EPI" para iniciar o cadastro.</span>
+                        </div>
+                        <div class="form-actions" style="justify-content: flex-end;">
+                            <button class="btn btn-primary">Novo EPI</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="view-recebimentos" class="view">
+                    <h1 class="page-title">Recebimentos</h1>
+                    <div class="empty-state-large">
+                        <p>Nenhum recebimento registrado.</p>
+                        <span>Dê entrada na sua primeira nota fiscal para iniciar.</span>
+                    </div>
+                </section>
+
+                <section id="view-movimentacoes" class="view">
+                    <h1 class="page-title">Movimentações</h1>
+                    <div class="empty-state-large">
+                        <p>Nenhuma movimentação encontrada.</p>
+                        <span>O histórico será gerado automaticamente após o primeiro recebimento.</span>
+                    </div>
+                </section>
+
+                <section id="view-estoque" class="view">
+                    <h1 class="page-title">Estoque</h1>
+                    <div class="empty-state-large">
+                        <p>Nenhum registro encontrado.</p>
+                        <span>Cadastre seu primeiro EPI para iniciar.</span>
+                    </div>
+                </section>
+
+                <section id="view-historico" class="view">
+                    <h1 class="page-title">Histórico de Sistema</h1>
+                    <div class="empty-state-large">
+                        <p>Nenhum registro encontrado.</p>
+                        <span>As ações dos usuários serão registradas aqui.</span>
+                    </div>
+                </section>
+
+                <section id="view-relatorios" class="view">
+                    <h1 class="page-title">Relatórios</h1>
+                    <div class="form-actions">
+                        <button class="btn btn-secondary">Exportar Excel</button>
+                        <button class="btn btn-secondary">Exportar PDF</button>
+                    </div>
+                    <div class="empty-state-large">
+                        <p>Não há dados suficientes para gerar relatórios.</p>
+                        <span>Alimente o sistema para habilitar as exportações.</span>
+                    </div>
+                </section>
+
+                <section id="view-configuracoes" class="view">
+                    <h1 class="page-title">Configurações</h1>
+                    <div class="empty-state-large">
+                        <p>Aguardando configuração inicial.</p>
+                        <span>Defina os parâmetros do sistema e conecte ao banco de dados.</span>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // MOCK do Banco de Dados (Garante inicialização estritamente vazia)
+        class Database {
+            static async getEPIs() { return []; }
+            static async getEstoque() { return []; }
+            static async getMovimentacoes() { return []; }
+        }
+
+        // Lógica de Interface (Roteamento da SPA)
+        class UI {
+            static initNavigation() {
+                const navItems = document.querySelectorAll('.nav-item');
+                const views = document.querySelectorAll('.view');
+
+                navItems.forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        
+                        // Remove active de todos os menus e esconde todas as views
+                        navItems.forEach(nav => nav.classList.remove('active'));
+                        views.forEach(view => {
+                            view.classList.remove('active');
+                        });
+
+                        // Ativa o item clicado e mostra a view correspondente
+                        item.classList.add('active');
+                        const targetId = `view-${item.dataset.target}`;
+                        const targetView = document.getElementById(targetId);
+                        
+                        if(targetView) {
+                            targetView.classList.add('active');
+                        }
+                    });
+                });
+            }
+        }
+
+        // Inicialização do App
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Inicia o sistema de navegação
+            UI.initNavigation();
+
+            // Simula a verificação do banco de dados vazio
+            const epis = await Database.getEPIs();
+            if (epis.length === 0) {
+                console.info("JF Safety: Sistema inicializado com sucesso. Nenhum registro encontrado no banco de dados.");
+            }
+        });
+    </script>
+</body>
+</html>
