@@ -88,13 +88,17 @@
         
         /* Tabelas Responsivas */
         .table-responsive { width: 100%; overflow-x: auto; border-radius: var(--radius-lg); border: 1px solid var(--border-light); background: var(--white); box-shadow: var(--shadow-sm); margin-top: 16px; }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th, td { padding: 16px; text-align: left; border-bottom: 1px solid var(--border-light); font-size: 0.875rem; }
+        table { width: 100%; border-collapse: collapse; min-width: 700px; }
+        th, td { padding: 16px; text-align: left; border-bottom: 1px solid var(--border-light); font-size: 0.875rem; vertical-align: middle; }
         th { background-color: #F9FAFB; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
         .status-badge { display: inline-flex; padding: 4px 10px; border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 600; }
         .badge-danger { background-color: var(--danger-light); color: var(--danger); }
         .badge-success { background-color: var(--success-light); color: var(--success); }
         .text-danger { color: var(--danger); font-weight: 600; }
+        
+        /* Botão de Excluir da Tabela */
+        .btn-icon { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 6px; border-radius: var(--radius-md); transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; }
+        .btn-icon:hover { color: var(--danger); background-color: var(--danger-light); }
 
         /* Empty States */
         .empty-state-large { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px; background-color: var(--white); border: 1px dashed var(--border-light); border-radius: var(--radius-lg); color: var(--text-muted); margin-top: 24px; text-align: center; padding: 24px; }
@@ -108,7 +112,7 @@
 
         /* ================= MEDIA QUERIES (Responsividade) ================= */
         @media (max-width: 1024px) {
-            .form-grid { grid-template-columns: 1fr; } /* Formulários em 1 coluna em tablets */
+            .form-grid { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 768px) {
@@ -126,7 +130,7 @@
             
             .dashboard-grid { grid-template-columns: 1fr; }
             
-            .btn { width: 100%; } /* Botões ocupam largura total no mobile */
+            .btn { width: 100%; }
         }
     </style>
 </head>
@@ -287,6 +291,7 @@
                                     <th>Qtd Atual</th>
                                     <th>Mínimo</th>
                                     <th>Status</th>
+                                    <th style="text-align: right;">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="estoque-tbody"></tbody>
@@ -299,8 +304,9 @@
     </div>
 
     <script type="module">
+        // Adicionada a importação do "deleteDoc"
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, query, where, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, query, where, updateDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         // =========================================================================
         // ATENÇÃO: SUBSTITUA AS CHAVES ABAIXO PELAS DO SEU PROJETO FIREBASE
@@ -336,6 +342,18 @@
                     await addDoc(episCol, epi);
                     return true;
                 } catch (error) { return false; }
+            }
+
+            // Nova função para deletar o registro diretamente no Firebase usando o ID do documento
+            static async deleteEPI(id) {
+                try {
+                    const docRef = doc(db, 'epis', id);
+                    await deleteDoc(docRef);
+                    return true;
+                } catch (error) {
+                    console.error("Erro ao excluir EPI:", error);
+                    return false;
+                }
             }
 
             static async updateEstoque(codigo, qtdAdicional) {
@@ -378,7 +396,6 @@
                 closeBtn.addEventListener('click', toggleMenu);
                 overlay.addEventListener('click', toggleMenu);
 
-                // Fechar menu ao clicar em um link no mobile
                 document.querySelectorAll('.nav-item').forEach(item => {
                     item.addEventListener('click', () => {
                         if (window.innerWidth <= 768) toggleMenu();
@@ -446,6 +463,7 @@
                     
                     const classEstoque = isDanger ? 'text-danger' : '';
 
+                    // Adicionado a coluna de Ações com o botão de excluir
                     tbody.innerHTML += `
                         <tr>
                             <td>${e.codigo}</td>
@@ -454,6 +472,11 @@
                             <td class="${classEstoque}">${e.estoque}</td>
                             <td>${e.minimo}</td>
                             <td>${statusHtml}</td>
+                            <td style="text-align: right;">
+                                <button class="btn-icon" onclick="window.App.excluirEPI('${e.id}', '${e.nome}')" title="Excluir item">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </td>
                         </tr>
                     `;
                 });
@@ -505,6 +528,25 @@
                     this.refreshViews();
                 } else {
                     alert('Erro ao salvar. Verifique o banco.');
+                }
+            }
+
+            // Nova função na lógica do app para processar a exclusão
+            static async excluirEPI(id, nome) {
+                // Pede confirmação antes de excluir para evitar acidentes
+                const confirmacao = confirm(`Tem certeza que deseja excluir o item "${nome}" do sistema? Esta ação não pode ser desfeita.`);
+                
+                if (confirmacao) {
+                    UI.showLoading(true);
+                    const sucesso = await DB.deleteEPI(id);
+                    UI.showLoading(false);
+
+                    if (sucesso) {
+                        alert('Item excluído com sucesso!');
+                        this.refreshViews(); // Atualiza a tabela instantaneamente
+                    } else {
+                        alert('Erro ao excluir o item. Tente novamente.');
+                    }
                 }
             }
 
