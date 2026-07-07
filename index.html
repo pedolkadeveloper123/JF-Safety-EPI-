@@ -11,6 +11,7 @@
     <style>
         :root {
             --brand-primary: #0F4C81;
+            --brand-light: #E6F0F9;
             --sidebar-bg: #081C2E;
             --app-bg: #F5F7FA;
             --white: #FFFFFF;
@@ -18,80 +19,136 @@
             --text-muted: #6B7280;
             --border-light: #E5E7EB;
             --danger: #DC2626;
+            --danger-light: #FEE2E2;
             --success: #059669;
+            --success-light: #D1FAE5;
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             --radius-md: 8px;
             --radius-lg: 12px;
+            --radius-full: 9999px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
         body { background-color: var(--app-bg); color: var(--text-main); height: 100vh; overflow: hidden; }
-        .app-layout { display: flex; height: 100vh; }
+        .app-layout { display: flex; height: 100vh; width: 100%; position: relative; }
 
-        /* Sidebar */
-        .sidebar { width: 260px; background-color: var(--sidebar-bg); display: flex; flex-direction: column; }
-        .sidebar-header { height: 72px; display: flex; align-items: center; padding: 0 24px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        /* Sidebar & Mobile Overlay */
+        .sidebar { width: 260px; background-color: var(--sidebar-bg); display: flex; flex-direction: column; z-index: 100; transition: transform 0.3s ease; flex-shrink: 0; }
+        .sidebar-header { height: 72px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .brand-logo { height: 32px; width: auto; }
-        .sidebar-nav { padding: 24px 12px; display: flex; flex-direction: column; gap: 4px; }
-        .nav-item { padding: 10px 16px; color: #94A3B8; text-decoration: none; font-size: 0.875rem; font-weight: 500; border-radius: var(--radius-md); cursor: pointer; }
+        .close-menu-btn { display: none; background: none; border: none; color: #94A3B8; cursor: pointer; }
+        .sidebar-nav { padding: 24px 12px; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
+        .nav-item { padding: 12px 16px; color: #94A3B8; text-decoration: none; font-size: 0.875rem; font-weight: 500; border-radius: var(--radius-md); cursor: pointer; display: flex; align-items: center; gap: 12px; }
         .nav-item:hover { color: var(--white); background-color: rgba(255, 255, 255, 0.05); }
         .nav-item.active { color: var(--white); background-color: var(--brand-primary); }
 
+        .mobile-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; opacity: 0; transition: opacity 0.3s ease; }
+
         /* Main Content */
-        .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
-        .topbar { height: 72px; background-color: var(--white); border-bottom: 1px solid var(--border-light); display: flex; align-items: center; padding: 0 40px; }
-        .content-area { padding: 40px; max-width: 1440px; margin: 0 auto; width: 100%; }
-        .page-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 32px; }
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; min-width: 0; }
+        .topbar { height: 72px; background-color: var(--white); border-bottom: 1px solid var(--border-light); display: flex; align-items: center; padding: 0 40px; gap: 20px; flex-shrink: 0; }
+        .menu-toggle { display: none; background: none; border: none; color: var(--text-main); cursor: pointer; padding: 8px; margin-left: -8px; }
+        .topbar-title { font-weight: 600; font-size: 1.125rem; display: none; }
+        
+        .content-area { padding: 40px; width: 100%; max-width: 1440px; margin: 0 auto; }
+        .page-header { margin-bottom: 32px; }
+        .page-title { font-size: 1.5rem; font-weight: 600; color: var(--text-main); }
+        .page-subtitle { font-size: 0.875rem; color: var(--text-muted); margin-top: 4px; }
 
         /* Views */
         .view { display: none; }
         .view.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Cards & Dashboard */
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; }
+        /* Dashboard Premium Redesign */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
         .card { background-color: var(--white); border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-sm); }
-        .card-title { font-size: 0.875rem; font-weight: 500; color: var(--text-muted); margin-bottom: 8px; }
-        .card-value { font-size: 2rem; font-weight: 700; color: var(--text-main); }
+        .card-header-flex { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+        .card-title { font-size: 0.875rem; font-weight: 600; color: var(--text-muted); }
+        .card-icon { width: 40px; height: 40px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .icon-blue { background-color: var(--brand-light); color: var(--brand-primary); }
+        .icon-green { background-color: var(--success-light); color: var(--success); }
+        .icon-red { background-color: var(--danger-light); color: var(--danger); }
+        .card-value { font-size: 2.25rem; font-weight: 700; color: var(--text-main); line-height: 1; }
 
         /* Formulários */
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
         label { font-size: 0.875rem; font-weight: 500; color: var(--text-main); }
-        input, select { padding: 10px; border: 1px solid var(--border-light); border-radius: var(--radius-md); font-size: 0.875rem; outline: none; }
-        input:focus, select:focus { border-color: var(--brand-primary); }
-        .btn { padding: 10px 20px; border-radius: var(--radius-md); font-size: 0.875rem; font-weight: 500; cursor: pointer; border: none; transition: 0.2s; }
+        input, select { padding: 12px; border: 1px solid var(--border-light); border-radius: var(--radius-md); font-size: 0.875rem; outline: none; width: 100%; transition: border-color 0.2s; }
+        input:focus, select:focus { border-color: var(--brand-primary); box-shadow: 0 0 0 3px var(--brand-light); }
+        .form-actions { margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap; }
+        .btn { padding: 12px 24px; border-radius: var(--radius-md); font-size: 0.875rem; font-weight: 500; cursor: pointer; border: none; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-primary { background-color: var(--brand-primary); color: var(--white); }
+        .btn-primary:hover { opacity: 0.9; }
         .btn-secondary { background-color: var(--white); color: var(--text-main); border: 1px solid var(--border-light); }
+        .btn-secondary:hover { background-color: #F9FAFB; }
         
-        /* Tabelas */
-        table { width: 100%; border-collapse: collapse; margin-top: 16px; background: var(--white); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); }
+        /* Tabelas Responsivas */
+        .table-responsive { width: 100%; overflow-x: auto; border-radius: var(--radius-lg); border: 1px solid var(--border-light); background: var(--white); box-shadow: var(--shadow-sm); margin-top: 16px; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
         th, td { padding: 16px; text-align: left; border-bottom: 1px solid var(--border-light); font-size: 0.875rem; }
-        th { background-color: #F9FAFB; font-weight: 600; color: var(--text-muted); }
-        .status-danger { color: var(--danger); font-weight: 600; }
-        .status-ok { color: var(--success); font-weight: 600; }
+        th { background-color: #F9FAFB; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+        .status-badge { display: inline-flex; padding: 4px 10px; border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 600; }
+        .badge-danger { background-color: var(--danger-light); color: var(--danger); }
+        .badge-success { background-color: var(--success-light); color: var(--success); }
+        .text-danger { color: var(--danger); font-weight: 600; }
 
         /* Empty States */
-        .empty-state-large { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px; background-color: var(--white); border: 1px dashed var(--border-light); border-radius: var(--radius-lg); color: var(--text-muted); margin-top: 24px; }
-        .empty-state-large p { font-size: 1rem; font-weight: 500; color: var(--text-main); margin-bottom: 8px; }
+        .empty-state-large { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px; background-color: var(--white); border: 1px dashed var(--border-light); border-radius: var(--radius-lg); color: var(--text-muted); margin-top: 24px; text-align: center; padding: 24px; }
+        .empty-state-large p { font-size: 1rem; font-weight: 600; color: var(--text-main); margin-bottom: 8px; }
         .hidden { display: none !important; }
         
         /* Loading Overlay */
-        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: flex; justify-content: center; align-items: center; z-index: 9999; font-weight: 600; color: var(--brand-primary); }
+        #loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
+        .spinner { width: 40px; height: 40px; border: 3px solid var(--border-light); border-top-color: var(--brand-primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ================= MEDIA QUERIES (Responsividade) ================= */
+        @media (max-width: 1024px) {
+            .form-grid { grid-template-columns: 1fr; } /* Formulários em 1 coluna em tablets */
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; top: 0; left: 0; height: 100%; transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .mobile-overlay.active { display: block; opacity: 1; }
+            .close-menu-btn { display: block; }
+            
+            .topbar { padding: 0 20px; }
+            .menu-toggle { display: block; }
+            .topbar-title { display: block; }
+            
+            .content-area { padding: 24px 20px; }
+            .page-title { font-size: 1.25rem; }
+            
+            .dashboard-grid { grid-template-columns: 1fr; }
+            
+            .btn { width: 100%; } /* Botões ocupam largura total no mobile */
+        }
     </style>
 </head>
 <body>
-    <div id="loading-overlay" class="hidden">Sincronizando com a nuvem...</div>
+    <div id="loading-overlay" class="hidden">
+        <div class="spinner"></div>
+        <div style="font-weight: 500; color: var(--text-main);">Sincronizando com a nuvem...</div>
+    </div>
 
     <div class="app-layout">
-        <aside class="sidebar">
+        <div class="mobile-overlay" id="mobile-overlay"></div>
+
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <svg class="brand-logo" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M14 16C30 16 46 20 54 34C54 34 46 26 34 22C24 19 14 20 14 20V16Z" fill="#0F4C81"/>
                     <path d="M14 28C24 28 36 32 44 42C44 42 38 36 30 32C24 29 14 30 14 30V28Z" fill="#0F4C81" opacity="0.8"/>
                     <path d="M14 16V48C14 54 18 58 24 58C30 58 36 54 36 48V42L28 42V48C28 50 26 52 24 52C22 52 20 50 20 48V16H14Z" fill="#F5F7FA"/>
                 </svg>
+                <button class="close-menu-btn" id="close-menu-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
             </div>
             <nav class="sidebar-nav">
                 <a class="nav-item active" data-target="dashboard">Dashboard</a>
@@ -102,47 +159,78 @@
         </aside>
 
         <main class="main-content">
+            <header class="topbar">
+                <button class="menu-toggle" id="menu-toggle">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+                </button>
+                <div class="topbar-title">JF Safety</div>
+            </header>
+
             <div class="content-area">
                 
                 <section id="view-dashboard" class="view active">
-                    <h1 class="page-title">Dashboard</h1>
+                    <div class="page-header">
+                        <h1 class="page-title">Visão Geral</h1>
+                        <p class="page-subtitle">Acompanhe os indicadores em tempo real.</p>
+                    </div>
+                    
                     <div class="dashboard-grid">
                         <div class="card">
-                            <h3 class="card-title">Modelos de EPIs</h3>
+                            <div class="card-header-flex">
+                                <h3 class="card-title">Modelos Cadastrados</h3>
+                                <div class="card-icon icon-blue">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                                </div>
+                            </div>
                             <div class="card-value" id="dash-epis">0</div>
                         </div>
+
                         <div class="card">
-                            <h3 class="card-title">Estoque Total (Unidades)</h3>
+                            <div class="card-header-flex">
+                                <h3 class="card-title">Estoque Total (Unid.)</h3>
+                                <div class="card-icon icon-green">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                                </div>
+                            </div>
                             <div class="card-value" id="dash-estoque">0</div>
                         </div>
-                        <div class="card">
-                            <h3 class="card-title">Itens Abaixo do Mínimo</h3>
-                            <div class="card-value status-danger" id="dash-minimo">0</div>
+
+                        <div class="card" style="border-color: var(--danger-light);">
+                            <div class="card-header-flex">
+                                <h3 class="card-title">Atenção: Abaixo do Mínimo</h3>
+                                <div class="card-icon icon-red">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                </div>
+                            </div>
+                            <div class="card-value text-danger" id="dash-minimo">0</div>
                         </div>
                     </div>
                 </section>
 
                 <section id="view-cadastro" class="view">
-                    <h1 class="page-title">Cadastro de EPIs</h1>
+                    <div class="page-header">
+                        <h1 class="page-title">Cadastro de EPIs</h1>
+                        <p class="page-subtitle">Adicione novos equipamentos ao catálogo.</p>
+                    </div>
                     
                     <div id="cadastro-empty" class="empty-state-large">
-                        <p>Nenhum formulário ativo.</p>
-                        <span>Clique em "Novo EPI" para iniciar.</span>
-                        <button class="btn btn-primary" style="margin-top: 16px;" onclick="window.UI.showForm('cadastro-form', 'cadastro-empty')">Novo EPI</button>
+                        <p>Pronto para iniciar o cadastro?</p>
+                        <span style="display:block; margin-bottom: 16px;">Registre os dados básicos para habilitar o controle.</span>
+                        <button class="btn btn-primary" onclick="window.UI.showForm('cadastro-form', 'cadastro-empty')">Novo EPI</button>
                     </div>
 
                     <div id="cadastro-form" class="card hidden">
                         <form id="form-epi" onsubmit="window.App.salvarEPI(event)">
                             <div class="form-grid">
-                                <div class="form-group"><label>Nome do EPI</label><input type="text" id="epi-nome" required></div>
-                                <div class="form-group"><label>Código Interno</label><input type="text" id="epi-codigo" required></div>
-                                <div class="form-group"><label>CA (Certificado de Aprovação)</label><input type="text" id="epi-ca"></div>
-                                <div class="form-group"><label>Fabricante</label><input type="text" id="epi-fab"></div>
+                                <div class="form-group"><label>Nome do EPI</label><input type="text" id="epi-nome" required placeholder="Ex: Luva de Raspa"></div>
+                                <div class="form-group"><label>Código Interno</label><input type="text" id="epi-codigo" required placeholder="Ex: LUV-001"></div>
+                                <div class="form-group"><label>CA (Certificado de Aprovação)</label><input type="text" id="epi-ca" placeholder="Número do CA"></div>
+                                <div class="form-group"><label>Fabricante</label><input type="text" id="epi-fab" placeholder="Nome do fabricante"></div>
                                 <div class="form-group"><label>Estoque Inicial</label><input type="number" id="epi-estoque" value="0" required></div>
-                                <div class="form-group"><label>Estoque Mínimo</label><input type="number" id="epi-minimo" value="5" required></div>
+                                <div class="form-group"><label>Estoque Mínimo Ideal</label><input type="number" id="epi-minimo" value="5" required></div>
                             </div>
-                            <div style="margin-top: 24px; display: flex; gap: 12px;">
-                                <button type="submit" class="btn btn-primary">Salvar na Nuvem</button>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Salvar Equipamento</button>
                                 <button type="button" class="btn btn-secondary" onclick="window.UI.hideForm('cadastro-form', 'cadastro-empty')">Cancelar</button>
                             </div>
                         </form>
@@ -150,25 +238,28 @@
                 </section>
 
                 <section id="view-recebimentos" class="view">
-                    <h1 class="page-title">Recebimentos (Entrada)</h1>
+                    <div class="page-header">
+                        <h1 class="page-title">Entrada de Materiais</h1>
+                        <p class="page-subtitle">Registre o recebimento para atualizar o estoque.</p>
+                    </div>
                     
                     <div id="rec-empty" class="empty-state-large">
-                        <p>Nenhum recebimento em andamento.</p>
+                        <p>Nenhuma entrada em andamento.</p>
                         <button class="btn btn-primary" style="margin-top: 16px;" onclick="window.UI.showForm('rec-form', 'rec-empty')">Nova Entrada</button>
                     </div>
 
                     <div id="rec-form" class="card hidden">
                         <form id="form-rec" onsubmit="window.App.salvarRecebimento(event)">
                             <div class="form-grid">
-                                <div class="form-group"><label>Nota Fiscal</label><input type="text" id="rec-nf" required></div>
+                                <div class="form-group"><label>Nota Fiscal</label><input type="text" id="rec-nf" required placeholder="Número da NF"></div>
                                 <div class="form-group">
                                     <label>Selecione o EPI</label>
                                     <select id="rec-epi" required></select>
                                 </div>
-                                <div class="form-group"><label>Quantidade Recebida</label><input type="number" id="rec-qtd" min="1" required></div>
+                                <div class="form-group" style="grid-column: 1 / -1;"><label>Quantidade Recebida</label><input type="number" id="rec-qtd" min="1" required placeholder="0"></div>
                             </div>
-                            <div style="margin-top: 24px; display: flex; gap: 12px;">
-                                <button type="submit" class="btn btn-primary">Confirmar e Atualizar Estoque</button>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Confirmar Recebimento</button>
                                 <button type="button" class="btn btn-secondary" onclick="window.UI.hideForm('rec-form', 'rec-empty')">Cancelar</button>
                             </div>
                         </form>
@@ -176,14 +267,17 @@
                 </section>
 
                 <section id="view-estoque" class="view">
-                    <h1 class="page-title">Controle de Estoque (Tempo Real)</h1>
+                    <div class="page-header">
+                        <h1 class="page-title">Controle de Estoque</h1>
+                        <p class="page-subtitle">Posição em tempo real de todos os itens.</p>
+                    </div>
                     
                     <div id="estoque-empty" class="empty-state-large">
                         <p>Nenhum registro encontrado.</p>
-                        <span>Cadastre seu primeiro EPI para iniciar.</span>
+                        <span>O estoque será gerado automaticamente após o primeiro cadastro.</span>
                     </div>
 
-                    <div id="estoque-table-container" class="hidden">
+                    <div id="estoque-table-container" class="table-responsive hidden">
                         <table>
                             <thead>
                                 <tr>
@@ -205,7 +299,6 @@
     </div>
 
     <script type="module">
-        // Importa os módulos essenciais do Firebase (Versão 10+)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, query, where, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
@@ -221,7 +314,6 @@
   appId: "1:980973372816:web:9eaa0cf83093997e241f15"
         };
 
-        // Inicializa o Firebase e o Firestore
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
@@ -243,10 +335,7 @@
                     const episCol = collection(db, 'epis');
                     await addDoc(episCol, epi);
                     return true;
-                } catch (error) {
-                    console.error("Erro ao salvar EPI:", error);
-                    return false;
-                }
+                } catch (error) { return false; }
             }
 
             static async updateEstoque(codigo, qtdAdicional) {
@@ -259,15 +348,11 @@
                         const docRef = doc(db, 'epis', snapshot.docs[0].id);
                         const currentData = snapshot.docs[0].data();
                         const novoEstoque = parseInt(currentData.estoque) + parseInt(qtdAdicional);
-                        
                         await updateDoc(docRef, { estoque: novoEstoque });
                         return true;
                     }
                     return false;
-                } catch (error) {
-                    console.error("Erro ao atualizar estoque:", error);
-                    return false;
-                }
+                } catch (error) { return false; }
             }
         }
 
@@ -276,6 +361,29 @@
             static showLoading(show) {
                 const overlay = document.getElementById('loading-overlay');
                 show ? overlay.classList.remove('hidden') : overlay.classList.add('hidden');
+            }
+
+            static initResponsiveMenu() {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('mobile-overlay');
+                const menuToggle = document.getElementById('menu-toggle');
+                const closeBtn = document.getElementById('close-menu-btn');
+
+                const toggleMenu = () => {
+                    sidebar.classList.toggle('open');
+                    overlay.classList.toggle('active');
+                };
+
+                menuToggle.addEventListener('click', toggleMenu);
+                closeBtn.addEventListener('click', toggleMenu);
+                overlay.addEventListener('click', toggleMenu);
+
+                // Fechar menu ao clicar em um link no mobile
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        if (window.innerWidth <= 768) toggleMenu();
+                    });
+                });
             }
 
             static initNav() {
@@ -332,29 +440,36 @@
 
                 epis.forEach(e => {
                     const isDanger = parseInt(e.estoque) < parseInt(e.minimo);
+                    const statusHtml = isDanger 
+                        ? '<span class="status-badge badge-danger">Estoque Baixo</span>'
+                        : '<span class="status-badge badge-success">Adequado</span>';
+                    
+                    const classEstoque = isDanger ? 'text-danger' : '';
+
                     tbody.innerHTML += `
                         <tr>
                             <td>${e.codigo}</td>
-                            <td>${e.nome}</td>
+                            <td style="font-weight: 500;">${e.nome}</td>
                             <td>${e.ca || '-'}</td>
-                            <td class="${isDanger ? 'status-danger' : 'status-ok'}">${e.estoque}</td>
+                            <td class="${classEstoque}">${e.estoque}</td>
                             <td>${e.minimo}</td>
-                            <td class="${isDanger ? 'status-danger' : 'status-ok'}">${isDanger ? 'Abaixo do Mínimo' : 'Adequado'}</td>
+                            <td>${statusHtml}</td>
                         </tr>
                     `;
                 });
             }
         }
 
-        // --- LÓGICA PRINCIPAL DA APLICAÇÃO ---
+        // --- LÓGICA PRINCIPAL ---
         class App {
             static async init() {
                 UI.initNav();
-                // Apenas inicia se o Firebase estiver configurado (evita travar a tela)
+                UI.initResponsiveMenu();
+                
                 if(firebaseConfig.apiKey !== "SUA_API_KEY") {
                     await this.refreshViews();
                 } else {
-                    console.warn("Configure suas chaves do Firebase no código para conectar à nuvem.");
+                    console.warn("Configure as chaves do Firebase.");
                 }
             }
 
@@ -384,12 +499,12 @@
                 UI.showLoading(false);
 
                 if (sucesso) {
-                    alert('EPI Cadastrado com sucesso na nuvem!');
+                    alert('EPI Cadastrado com sucesso!');
                     document.getElementById('form-epi').reset();
                     UI.hideForm('cadastro-form', 'cadastro-empty');
                     this.refreshViews();
                 } else {
-                    alert('Erro ao salvar. Verifique suas regras do Firestore.');
+                    alert('Erro ao salvar. Verifique o banco.');
                 }
             }
 
@@ -398,9 +513,9 @@
                 const select = document.getElementById('rec-epi');
                 const epis = await DB.getEPIs();
                 
-                select.innerHTML = '<option value="">Selecione...</option>';
+                select.innerHTML = '<option value="">Selecione um item...</option>';
                 epis.forEach(e => {
-                    select.innerHTML += `<option value="${e.codigo}">[${e.codigo}] ${e.nome} (Estoque: ${e.estoque})</option>`;
+                    select.innerHTML += `<option value="${e.codigo}">[${e.codigo}] ${e.nome} (Atual: ${e.estoque})</option>`;
                 });
                 UI.showLoading(false);
             }
@@ -417,7 +532,7 @@
                 UI.showLoading(false);
 
                 if (sucesso) {
-                    alert('Recebimento registrado e estoque atualizado na nuvem!');
+                    alert('Recebimento registrado com sucesso!');
                     document.getElementById('form-rec').reset();
                     UI.hideForm('rec-form', 'rec-empty');
                     this.refreshViews();
@@ -427,11 +542,8 @@
             }
         }
 
-        // Expõe as classes globalmente para que os onclicks do HTML funcionem
         window.UI = UI;
         window.App = App;
-
-        // Inicia a aplicação
         document.addEventListener('DOMContentLoaded', () => window.App.init());
     </script>
 </body>
