@@ -10,242 +10,73 @@
     
     <style>
         :root {
-            /* Identidade Visual */
+            var(--brand-primary): #0F4C81;
             --brand-primary: #0F4C81;
             --sidebar-bg: #081C2E;
             --app-bg: #F5F7FA;
-            
-            /* Cores neutras */
             --white: #FFFFFF;
             --text-main: #111827;
             --text-muted: #6B7280;
             --border-light: #E5E7EB;
-            
-            /* Alertas */
             --danger: #DC2626;
-            
-            /* Sombras e Raios */
+            --success: #059669;
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             --radius-md: 8px;
             --radius-lg: 12px;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        body {
-            background-color: var(--app-bg);
-            color: var(--text-main);
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .app-layout {
-            display: flex;
-            height: 100vh;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        body { background-color: var(--app-bg); color: var(--text-main); height: 100vh; overflow: hidden; }
+        .app-layout { display: flex; height: 100vh; }
 
         /* Sidebar */
-        .sidebar {
-            width: 260px;
-            background-color: var(--sidebar-bg);
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .sidebar-header {
-            height: 72px;
-            display: flex;
-            align-items: center;
-            padding: 0 24px;
-        }
-
-        .brand-logo {
-            height: 32px;
-            width: auto;
-        }
-
-        .sidebar-nav {
-            display: flex;
-            flex-direction: column;
-            padding: 24px 12px;
-            gap: 4px;
-        }
-
-        .nav-item {
-            padding: 10px 16px;
-            color: #94A3B8;
-            text-decoration: none;
-            font-size: 0.875rem;
-            font-weight: 500;
-            border-radius: var(--radius-md);
-            transition: all 0.2s ease;
-        }
-
-        .nav-item:hover {
-            color: var(--white);
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .nav-item.active {
-            color: var(--white);
-            background-color: var(--brand-primary);
-        }
+        .sidebar { width: 260px; background-color: var(--sidebar-bg); display: flex; flex-direction: column; }
+        .sidebar-header { height: 72px; display: flex; align-items: center; padding: 0 24px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .brand-logo { height: 32px; width: auto; }
+        .sidebar-nav { padding: 24px 12px; display: flex; flex-direction: column; gap: 4px; }
+        .nav-item { padding: 10px 16px; color: #94A3B8; text-decoration: none; font-size: 0.875rem; font-weight: 500; border-radius: var(--radius-md); cursor: pointer; }
+        .nav-item:hover { color: var(--white); background-color: rgba(255, 255, 255, 0.05); }
+        .nav-item.active { color: var(--white); background-color: var(--brand-primary); }
 
         /* Main Content */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-        }
-
-        .topbar {
-            height: 72px;
-            background-color: var(--white);
-            border-bottom: 1px solid var(--border-light);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 40px;
-        }
-
-        .search-container {
-            flex: 1;
-            max-width: 480px;
-        }
-
-        .global-search {
-            width: 100%;
-            padding: 10px 16px;
-            border: 1px solid var(--border-light);
-            border-radius: var(--radius-md);
-            font-size: 0.875rem;
-            outline: none;
-            transition: border-color 0.2s ease;
-        }
-
-        .global-search:focus {
-            border-color: var(--brand-primary);
-        }
-
-        .avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background-color: var(--border-light);
-        }
-
-        .content-area {
-            padding: 40px;
-            max-width: 1440px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        .page-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 32px;
-            color: var(--text-main);
-        }
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        .topbar { height: 72px; background-color: var(--white); border-bottom: 1px solid var(--border-light); display: flex; align-items: center; padding: 0 40px; }
+        .content-area { padding: 40px; max-width: 1440px; margin: 0 auto; width: 100%; }
+        .page-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 32px; }
 
         /* Views */
         .view { display: none; }
         .view.active { display: block; animation: fadeIn 0.3s ease; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(4px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Cards & Dashboard */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 24px;
-        }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; }
+        .card { background-color: var(--white); border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-sm); }
+        .card-title { font-size: 0.875rem; font-weight: 500; color: var(--text-muted); margin-bottom: 8px; }
+        .card-value { font-size: 2rem; font-weight: 700; color: var(--text-main); }
 
-        .card {
-            background-color: var(--white);
-            border: 1px solid var(--border-light);
-            border-radius: var(--radius-lg);
-            padding: 24px;
-            box-shadow: var(--shadow-sm);
-            min-height: 140px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .card-title {
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--text-muted);
-            margin-bottom: 16px;
-        }
-
-        /* Estados Vazios (Empty States) */
-        .empty-state {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            font-size: 0.875rem;
-            color: var(--text-muted);
-            font-weight: 400;
-        }
-
-        .empty-state-large {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 300px;
-            background-color: var(--white);
-            border: 1px dashed var(--border-light);
-            border-radius: var(--radius-lg);
-            color: var(--text-muted);
-            margin-top: 24px;
-        }
-
-        .empty-state-large p {
-            font-size: 1rem;
-            font-weight: 500;
-            color: var(--text-main);
-            margin-bottom: 8px;
-        }
-
-        .empty-state-large span {
-            font-size: 0.875rem;
-        }
-
-        /* Base para formulários vazios */
-        .form-actions {
-            margin-top: 24px;
-            display: flex;
-            gap: 12px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border-radius: var(--radius-md);
-            font-size: 0.875rem;
-            font-weight: 500;
-            cursor: pointer;
-            border: none;
-            transition: opacity 0.2s;
-        }
-
-        .btn:hover { opacity: 0.9; }
-        
+        /* Formulários */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+        label { font-size: 0.875rem; font-weight: 500; color: var(--text-main); }
+        input, select { padding: 10px; border: 1px solid var(--border-light); border-radius: var(--radius-md); font-size: 0.875rem; outline: none; }
+        input:focus, select:focus { border-color: var(--brand-primary); }
+        .btn { padding: 10px 20px; border-radius: var(--radius-md); font-size: 0.875rem; font-weight: 500; cursor: pointer; border: none; }
         .btn-primary { background-color: var(--brand-primary); color: var(--white); }
         .btn-secondary { background-color: var(--white); color: var(--text-main); border: 1px solid var(--border-light); }
+        
+        /* Tabelas */
+        table { width: 100%; border-collapse: collapse; margin-top: 16px; background: var(--white); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); }
+        th, td { padding: 16px; text-align: left; border-bottom: 1px solid var(--border-light); font-size: 0.875rem; }
+        th { background-color: #F9FAFB; font-weight: 600; color: var(--text-muted); }
+        .status-danger { color: var(--danger); font-weight: 600; }
+        .status-ok { color: var(--success); font-weight: 600; }
+
+        /* Empty States */
+        .empty-state-large { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px; background-color: var(--white); border: 1px dashed var(--border-light); border-radius: var(--radius-lg); color: var(--text-muted); margin-top: 24px; }
+        .empty-state-large p { font-size: 1rem; font-weight: 500; color: var(--text-main); margin-bottom: 8px; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -259,113 +90,109 @@
                 </svg>
             </div>
             <nav class="sidebar-nav">
-                <a href="#" class="nav-item active" data-target="dashboard">Dashboard</a>
-                <a href="#" class="nav-item" data-target="cadastro">Cadastro de EPIs</a>
-                <a href="#" class="nav-item" data-target="recebimentos">Recebimentos</a>
-                <a href="#" class="nav-item" data-target="movimentacoes">Movimentações</a>
-                <a href="#" class="nav-item" data-target="estoque">Estoque</a>
-                <a href="#" class="nav-item" data-target="historico">Histórico</a>
-                <a href="#" class="nav-item" data-target="relatorios">Relatórios</a>
-                <a href="#" class="nav-item" data-target="configuracoes">Configurações</a>
+                <a class="nav-item active" data-target="dashboard">Dashboard</a>
+                <a class="nav-item" data-target="cadastro">Cadastro de EPIs</a>
+                <a class="nav-item" data-target="recebimentos">Recebimentos</a>
+                <a class="nav-item" data-target="estoque">Estoque</a>
             </nav>
         </aside>
 
         <main class="main-content">
-            <header class="topbar">
-                <div class="search-container">
-                    <input type="text" class="global-search" placeholder="Pesquisar por Nome, Código, CA ou Fornecedor...">
-                </div>
-                <div class="user-profile">
-                    <div class="avatar"></div>
-                </div>
-            </header>
-
             <div class="content-area">
                 
                 <section id="view-dashboard" class="view active">
                     <h1 class="page-title">Dashboard</h1>
                     <div class="dashboard-grid">
                         <div class="card">
-                            <h3 class="card-title">EPIs Cadastrados</h3>
-                            <div class="empty-state">Nenhum registro encontrado.</div>
+                            <h3 class="card-title">Modelos de EPIs</h3>
+                            <div class="card-value" id="dash-epis">0</div>
                         </div>
                         <div class="card">
-                            <h3 class="card-title">Estoque Total</h3>
-                            <div class="empty-state">Nenhum registro encontrado.</div>
+                            <h3 class="card-title">Estoque Total (Unidades)</h3>
+                            <div class="card-value" id="dash-estoque">0</div>
                         </div>
                         <div class="card">
                             <h3 class="card-title">Itens Abaixo do Mínimo</h3>
-                            <div class="empty-state">Nenhum registro encontrado.</div>
-                        </div>
-                        <div class="card">
-                            <h3 class="card-title">Últimos Recebimentos</h3>
-                            <div class="empty-state">Nenhum registro encontrado.</div>
+                            <div class="card-value status-danger" id="dash-minimo">0</div>
                         </div>
                     </div>
                 </section>
 
                 <section id="view-cadastro" class="view">
                     <h1 class="page-title">Cadastro de EPIs</h1>
-                    <div class="card">
-                        <div class="empty-state-large">
-                            <p>Nenhum formulário ativo no momento.</p>
-                            <span>Clique em "Novo EPI" para iniciar o cadastro.</span>
-                        </div>
-                        <div class="form-actions" style="justify-content: flex-end;">
-                            <button class="btn btn-primary">Novo EPI</button>
-                        </div>
+                    
+                    <div id="cadastro-empty" class="empty-state-large">
+                        <p>Nenhum formulário ativo.</p>
+                        <span>Clique em "Novo EPI" para iniciar.</span>
+                        <button class="btn btn-primary" style="margin-top: 16px;" onclick="UI.showForm('cadastro-form', 'cadastro-empty')">Novo EPI</button>
+                    </div>
+
+                    <div id="cadastro-form" class="card hidden">
+                        <form id="form-epi" onsubmit="App.salvarEPI(event)">
+                            <div class="form-grid">
+                                <div class="form-group"><label>Nome do EPI</label><input type="text" id="epi-nome" required></div>
+                                <div class="form-group"><label>Código Interno</label><input type="text" id="epi-codigo" required></div>
+                                <div class="form-group"><label>CA (Certificado de Aprovação)</label><input type="text" id="epi-ca"></div>
+                                <div class="form-group"><label>Fabricante</label><input type="text" id="epi-fab"></div>
+                                <div class="form-group"><label>Estoque Inicial</label><input type="number" id="epi-estoque" value="0" required></div>
+                                <div class="form-group"><label>Estoque Mínimo</label><input type="number" id="epi-minimo" value="5" required></div>
+                            </div>
+                            <div style="margin-top: 24px; display: flex; gap: 12px;">
+                                <button type="submit" class="btn btn-primary">Salvar EPI</button>
+                                <button type="button" class="btn btn-secondary" onclick="UI.hideForm('cadastro-form', 'cadastro-empty')">Cancelar</button>
+                            </div>
+                        </form>
                     </div>
                 </section>
 
                 <section id="view-recebimentos" class="view">
-                    <h1 class="page-title">Recebimentos</h1>
-                    <div class="empty-state-large">
-                        <p>Nenhum recebimento registrado.</p>
-                        <span>Dê entrada na sua primeira nota fiscal para iniciar.</span>
+                    <h1 class="page-title">Recebimentos (Entrada)</h1>
+                    
+                    <div id="rec-empty" class="empty-state-large">
+                        <p>Nenhum recebimento em andamento.</p>
+                        <button class="btn btn-primary" style="margin-top: 16px;" onclick="UI.showForm('rec-form', 'rec-empty')">Nova Entrada</button>
                     </div>
-                </section>
 
-                <section id="view-movimentacoes" class="view">
-                    <h1 class="page-title">Movimentações</h1>
-                    <div class="empty-state-large">
-                        <p>Nenhuma movimentação encontrada.</p>
-                        <span>O histórico será gerado automaticamente após o primeiro recebimento.</span>
+                    <div id="rec-form" class="card hidden">
+                        <form onsubmit="App.salvarRecebimento(event)">
+                            <div class="form-grid">
+                                <div class="form-group"><label>Nota Fiscal</label><input type="text" id="rec-nf" required></div>
+                                <div class="form-group">
+                                    <label>Selecione o EPI</label>
+                                    <select id="rec-epi" required></select>
+                                </div>
+                                <div class="form-group"><label>Quantidade Recebida</label><input type="number" id="rec-qtd" min="1" required></div>
+                            </div>
+                            <div style="margin-top: 24px; display: flex; gap: 12px;">
+                                <button type="submit" class="btn btn-primary">Confirmar Recebimento</button>
+                                <button type="button" class="btn btn-secondary" onclick="UI.hideForm('rec-form', 'rec-empty')">Cancelar</button>
+                            </div>
+                        </form>
                     </div>
                 </section>
 
                 <section id="view-estoque" class="view">
-                    <h1 class="page-title">Estoque</h1>
-                    <div class="empty-state-large">
+                    <h1 class="page-title">Controle de Estoque</h1>
+                    
+                    <div id="estoque-empty" class="empty-state-large">
                         <p>Nenhum registro encontrado.</p>
                         <span>Cadastre seu primeiro EPI para iniciar.</span>
                     </div>
-                </section>
 
-                <section id="view-historico" class="view">
-                    <h1 class="page-title">Histórico de Sistema</h1>
-                    <div class="empty-state-large">
-                        <p>Nenhum registro encontrado.</p>
-                        <span>As ações dos usuários serão registradas aqui.</span>
-                    </div>
-                </section>
-
-                <section id="view-relatorios" class="view">
-                    <h1 class="page-title">Relatórios</h1>
-                    <div class="form-actions">
-                        <button class="btn btn-secondary">Exportar Excel</button>
-                        <button class="btn btn-secondary">Exportar PDF</button>
-                    </div>
-                    <div class="empty-state-large">
-                        <p>Não há dados suficientes para gerar relatórios.</p>
-                        <span>Alimente o sistema para habilitar as exportações.</span>
-                    </div>
-                </section>
-
-                <section id="view-configuracoes" class="view">
-                    <h1 class="page-title">Configurações</h1>
-                    <div class="empty-state-large">
-                        <p>Aguardando configuração inicial.</p>
-                        <span>Defina os parâmetros do sistema e conecte ao banco de dados.</span>
+                    <div id="estoque-table-container" class="hidden">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Nome</th>
+                                    <th>CA</th>
+                                    <th>Qtd Atual</th>
+                                    <th>Mínimo</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="estoque-tbody"></tbody>
+                        </table>
                     </div>
                 </section>
 
@@ -374,53 +201,151 @@
     </div>
 
     <script>
-        // MOCK do Banco de Dados (Garante inicialização estritamente vazia)
-        class Database {
-            static async getEPIs() { return []; }
-            static async getEstoque() { return []; }
-            static async getMovimentacoes() { return []; }
+        // --- BANCO DE DADOS LOCAL (localStorage) ---
+        class DB {
+            static getEPIs() { return JSON.parse(localStorage.getItem('jf_epis')) || []; }
+            static saveEPI(epi) {
+                const epis = this.getEPIs();
+                epis.push(epi);
+                localStorage.setItem('jf_epis', JSON.stringify(epis));
+            }
+            static updateEstoque(codigo, qtdAdicional) {
+                const epis = this.getEPIs();
+                const index = epis.findIndex(e => e.codigo === codigo);
+                if (index !== -1) {
+                    epis[index].estoque = parseInt(epis[index].estoque) + parseInt(qtdAdicional);
+                    localStorage.setItem('jf_epis', JSON.stringify(epis));
+                }
+            }
         }
 
-        // Lógica de Interface (Roteamento da SPA)
+        // --- INTERFACE (UI) ---
         class UI {
-            static initNavigation() {
-                const navItems = document.querySelectorAll('.nav-item');
-                const views = document.querySelectorAll('.view');
-
-                navItems.forEach(item => {
+            static initNav() {
+                document.querySelectorAll('.nav-item').forEach(item => {
                     item.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        
-                        // Remove active de todos os menus e esconde todas as views
-                        navItems.forEach(nav => nav.classList.remove('active'));
-                        views.forEach(view => {
-                            view.classList.remove('active');
-                        });
-
-                        // Ativa o item clicado e mostra a view correspondente
+                        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
                         item.classList.add('active');
-                        const targetId = `view-${item.dataset.target}`;
-                        const targetView = document.getElementById(targetId);
-                        
-                        if(targetView) {
-                            targetView.classList.add('active');
-                        }
+                        document.getElementById(`view-${item.dataset.target}`).classList.add('active');
+                        App.refreshViews(); // Atualiza dados ao trocar de tela
                     });
+                });
+            }
+
+            static showForm(formId, emptyId) {
+                document.getElementById(emptyId).classList.add('hidden');
+                document.getElementById(formId).classList.remove('hidden');
+                App.loadSelectEPIs(); // Atualiza o select de recebimentos
+            }
+
+            static hideForm(formId, emptyId) {
+                document.getElementById(formId).classList.add('hidden');
+                document.getElementById(emptyId).classList.remove('hidden');
+            }
+
+            static updateDashboard(epis) {
+                let totalEstoque = 0;
+                let abaixoMinimo = 0;
+
+                epis.forEach(e => {
+                    totalEstoque += parseInt(e.estoque);
+                    if (parseInt(e.estoque) < parseInt(e.minimo)) abaixoMinimo++;
+                });
+
+                document.getElementById('dash-epis').innerText = epis.length;
+                document.getElementById('dash-estoque').innerText = totalEstoque;
+                document.getElementById('dash-minimo').innerText = abaixoMinimo;
+            }
+
+            static renderEstoque(epis) {
+                const empty = document.getElementById('estoque-empty');
+                const tableCont = document.getElementById('estoque-table-container');
+                const tbody = document.getElementById('estoque-tbody');
+
+                if (epis.length === 0) {
+                    empty.classList.remove('hidden');
+                    tableCont.classList.add('hidden');
+                    return;
+                }
+
+                empty.classList.add('hidden');
+                tableCont.classList.remove('hidden');
+                tbody.innerHTML = '';
+
+                epis.forEach(e => {
+                    const isDanger = parseInt(e.estoque) < parseInt(e.minimo);
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${e.codigo}</td>
+                            <td>${e.nome}</td>
+                            <td>${e.ca || '-'}</td>
+                            <td class="${isDanger ? 'status-danger' : 'status-ok'}">${e.estoque}</td>
+                            <td>${e.minimo}</td>
+                            <td class="${isDanger ? 'status-danger' : 'status-ok'}">${isDanger ? 'Abaixo do Mínimo' : 'Adequado'}</td>
+                        </tr>
+                    `;
                 });
             }
         }
 
-        // Inicialização do App
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Inicia o sistema de navegação
-            UI.initNavigation();
-
-            // Simula a verificação do banco de dados vazio
-            const epis = await Database.getEPIs();
-            if (epis.length === 0) {
-                console.info("JF Safety: Sistema inicializado com sucesso. Nenhum registro encontrado no banco de dados.");
+        // --- LÓGICA PRINCIPAL (App) ---
+        class App {
+            static init() {
+                UI.initNav();
+                this.refreshViews();
             }
-        });
+
+            static refreshViews() {
+                const epis = DB.getEPIs();
+                UI.updateDashboard(epis);
+                UI.renderEstoque(epis);
+            }
+
+            static salvarEPI(e) {
+                e.preventDefault();
+                const epi = {
+                    nome: document.getElementById('epi-nome').value,
+                    codigo: document.getElementById('epi-codigo').value,
+                    ca: document.getElementById('epi-ca').value,
+                    fab: document.getElementById('epi-fab').value,
+                    estoque: document.getElementById('epi-estoque').value,
+                    minimo: document.getElementById('epi-minimo').value
+                };
+                
+                DB.saveEPI(epi);
+                alert('EPI Cadastrado com sucesso!');
+                document.getElementById('form-epi').reset();
+                UI.hideForm('cadastro-form', 'cadastro-empty');
+                this.refreshViews();
+            }
+
+            static loadSelectEPIs() {
+                const select = document.getElementById('rec-epi');
+                const epis = DB.getEPIs();
+                select.innerHTML = '<option value="">Selecione...</option>';
+                epis.forEach(e => {
+                    select.innerHTML += `<option value="${e.codigo}">[${e.codigo}] ${e.nome}</option>`;
+                });
+            }
+
+            static salvarRecebimento(e) {
+                e.preventDefault();
+                const codigoEpi = document.getElementById('rec-epi').value;
+                const qtd = document.getElementById('rec-qtd').value;
+
+                if(!codigoEpi) return alert("Selecione um EPI.");
+
+                DB.updateEstoque(codigoEpi, qtd);
+                alert('Recebimento registrado e estoque atualizado!');
+                e.target.reset();
+                UI.hideForm('rec-form', 'rec-empty');
+                this.refreshViews();
+            }
+        }
+
+        // Inicia o sistema
+        document.addEventListener('DOMContentLoaded', () => App.init());
     </script>
 </body>
 </html>
